@@ -14,10 +14,18 @@
       ]
     },
     {
-      "frames": {"start": 10, "stop": 35}
+      "frames": {"start": 10, "stop": 35},
       "clips": [
         {"type": "step-1", "position": {"x": 50, "y": 10}}
       ]
+    }
+  ],
+  "animations": [
+    {
+      "frames": {
+        "start": {}, 
+        "stop": {}
+      }
     }
   ]
 }
