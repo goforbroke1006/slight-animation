@@ -1,0 +1,23 @@
+{
+  "clips": [
+      "background": "./assets/sample-1.jpg",
+      "step-1": "./assets/1.png",
+      "step-2": "./assets/2.png",
+      "step-3": "./assets/3.png",
+      "step-4": "./assets/4.png",
+  ],
+  "layouts": [
+    {
+      "frames": {"start": 0}, 
+      "clips": [
+        {"type": "background", "position": {"x": 0, "y": 0}}
+      ]
+    },
+    {
+      "frames": {"start": 10, "stop": 35}
+      "clips": [
+        {"type": "step-1", "position": {"x": 50, "y": 10}}
+      ]
+    }
+  ]
+}
