@@ -3,7 +3,10 @@ project(slight-animation)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(slight-animation main.cpp script.h)
+add_executable(slight-animation main.cpp script.h tests/script_tests.cpp)
 
 find_package(OpenCV REQUIRED)
 target_link_libraries(slight-animation ${OpenCV_LIBS})
+
+
+add_subdirectory(tests)

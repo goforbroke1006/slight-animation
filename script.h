@@ -47,7 +47,7 @@ namespace slightAnimation {
     public:
         Point(int x, int y) : x(x), y(y) {}
 
-        int getX() const {
+        const int &getX() const {
             return x;
         }
 
@@ -55,7 +55,7 @@ namespace slightAnimation {
             Point::x = x;
         }
 
-        int getY() const {
+        const int &getY() const {
             return y;
         }
 
@@ -115,7 +115,7 @@ namespace slightAnimation {
             }
         }
 
-        Point getPositionFor(unsigned long index) {
+        const Point &getPositionFor(unsigned long index) const {
             if (index < start.getIndex() || stop.getIndex() < index) {
                 throw WrongFrameIndex();
             }
@@ -131,6 +131,9 @@ namespace slightAnimation {
             int partY = movementY / range;
             int aproxY = start.getPosition().getY()
                          + partY * localIndex;
+
+            const Point &point = Point(aproxX, aproxY);
+            return point;
         }
     };
 
@@ -139,7 +142,7 @@ namespace slightAnimation {
         string m_outputFilename;
         unsigned int m_width;
         unsigned int m_height;
-        list<Animation> m_clips;
+        list <Animation> m_clips;
     };
 }
 
