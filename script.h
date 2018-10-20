@@ -13,15 +13,16 @@
 using namespace std;
 using namespace cv;
 
-namespace slightAnimation {
+namespace SlightAnimation {
 
     class Clip {
     private:
         string name;
-        Mat material;
+        const Mat *material;
     public:
-        Clip(const string &name, const string &filename) {
-            this->material = imread(filename, IMREAD_COLOR);
+        Clip(const string &name, const Mat *material)
+                : name(name),
+                  material(material) {
         }
 
         const string &getName() const {
@@ -32,11 +33,11 @@ namespace slightAnimation {
             Clip::name = name;
         }
 
-        const Mat &getMaterial() const {
+        const Mat *getMaterial() const {
             return material;
         }
 
-        void setMaterial(const Mat &material) {
+        void setMaterial(const Mat *material) {
             Clip::material = material;
         }
     };
@@ -45,7 +46,9 @@ namespace slightAnimation {
     private:
         int x, y;
     public:
-        Point(int x, int y) : x(x), y(y) {}
+        Point(int x, int y)
+                : x(x),
+                  y(y) {}
 
         const int &getX() const {
             return x;
@@ -92,7 +95,7 @@ namespace slightAnimation {
 
     class Animation {
     private:
-        Clip clip;
+        const Clip *clip;
         KeyFrame start;
         KeyFrame stop;
     public:
@@ -103,7 +106,7 @@ namespace slightAnimation {
         };
 
         Animation(
-                const Clip &clip,
+                const Clip *clip,
                 const KeyFrame &start,
                 const KeyFrame &stop
         )
@@ -139,10 +142,94 @@ namespace slightAnimation {
 
     class AnimationScript {
     private:
-        string m_outputFilename;
-        unsigned int m_width;
-        unsigned int m_height;
-        list <Animation> m_clips;
+        string outputFilename;
+        unsigned int width;
+        unsigned int height;
+        list<Clip> clips;
+        list<Animation> animations;
+    public:
+        const string &getOutputFilename() const {
+            return outputFilename;
+        }
+
+        void setOutputFilename(const string &outputFilename) {
+            AnimationScript::outputFilename = outputFilename;
+        }
+
+        unsigned int getWidth() const {
+            return width;
+        }
+
+        void setWidth(unsigned int width) {
+            AnimationScript::width = width;
+        }
+
+        unsigned int getHeight() const {
+            return height;
+        }
+
+        void setHeight(unsigned int height) {
+            AnimationScript::height = height;
+        }
+
+        const list<Clip> &getClips() const {
+            return clips;
+        }
+
+        void addClip(const Clip clip) {
+            clips.push_back(clip);
+        }
+
+        void setClips(const list<Clip> &clips) {
+            AnimationScript::clips = clips;
+        }
+
+        const Clip *getClip(const string &name) {
+            for (const auto &c : clips) {
+                if (c.getName() == name) {
+                    return &c;
+                }
+            }
+            return nullptr;
+        }
+
+        const list<Animation> &getAnimations() const {
+            return animations;
+        }
+
+        void setAnimations(const list<Animation> &animations) {
+            AnimationScript::animations = animations;
+        }
+
+        void addAnimation(const Animation &animation) {
+            animations.push_back(animation);
+        }
+
+        const Mat &getFrame(unsigned long frameIndex) {
+            cv::Rect roi = cv::Rect(0, 0, this->getWidth(), this->getHeight());
+
+            const Mat bgMat = *(this->getClip("background")->getMaterial());
+            cv::Mat out_image = bgMat.clone();
+
+            cv::Mat A_roi = bgMat(roi);
+            cv::Mat out_image_roi = out_image(roi);
+
+            double alpha = 0.1;
+
+            for (const auto &anim : this->getAnimations()) {
+                try {
+                    const Point &point = anim.getPositionFor(frameIndex);
+                    cv::Mat out = cv::Mat::zeros(bgMat.size(), bgMat.type());
+                    bgMat(cv::Rect(0, 10, bgMat.cols, bgMat.rows - 10))
+                            .copyTo(out(cv::Rect(0, 0, bgMat.cols, bgMat.rows - 10)));
+                    cv::addWeighted(A_roi, alpha, out, 1 - alpha, 0.0, out_image_roi);
+                } catch (Animation::WrongFrameIndex ex) {
+                    //
+                }
+            }
+
+            return out_image_roi;
+        }
     };
 }
 

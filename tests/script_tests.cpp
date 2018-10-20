@@ -8,18 +8,18 @@
 #include <gtest/gtest.h>
 #include "../script.h"
 
-using namespace slightAnimation;
+using namespace SlightAnimation;
 
 TEST(SquareRootTest, PositiveNos) {
 
-    const Clip clip = Clip("", "");
-    const KeyFrame start = KeyFrame(100, slightAnimation::Point(300, 400));
-    const KeyFrame stop = KeyFrame(200, slightAnimation::Point(100, 800));
+    const Clip clip = Clip("", nullptr);
+    const KeyFrame start = KeyFrame(100, SlightAnimation::Point(300, 400));
+    const KeyFrame stop = KeyFrame(200, SlightAnimation::Point(100, 800));
     unique_ptr<Animation> animation(
             new Animation(clip, start, stop)
     );
 
-    const slightAnimation::Point &tmpPoint = animation->getPositionFor(175);
+    const SlightAnimation::Point &tmpPoint = animation->getPositionFor(175);
 
     const int x = tmpPoint.getX();
     const int y = tmpPoint.getY();

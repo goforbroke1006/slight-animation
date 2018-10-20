@@ -2,10 +2,22 @@
 #include <opencv2/opencv.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include "script.h"
 
 using namespace std;
 using namespace cv;
 namespace pt = boost::property_tree;
+using namespace SlightAnimation;
+
+KeyFrame parseKeyFrame(const pt::ptree &node) {
+    const unsigned long &frameNumber = atoi(node.get_child("frame").data().c_str());
+//    cout << frameNumber << endl;
+    const pt::ptree &posNode = node.get_child("position");
+    const int &posX = atoi(posNode.get_child("x").data().c_str());
+    const int &posY = atoi(posNode.get_child("y").data().c_str());
+
+    return KeyFrame(frameNumber, SlightAnimation::Point(posX, posY));
+}
 
 int main(int argc, char **argv) {
     if (2 != argc) {
@@ -18,24 +30,40 @@ int main(int argc, char **argv) {
     pt::ptree root;
     pt::read_json(scriptFilename, root);
 
-    int width = root.get<int>("width", 0);
-    int height = root.get<int>("height", 0);
+//    int width = root.get<int>("width", 0);
+//    int height = root.get<int>("height", 0);
     string outputFilename = root.get<char *>("output-file", 0);
 
-    VideoWriter video(outputFilename, CV_FOURCC('M', 'J', 'P', 'G'), 10, Size(width, height), true);
+    AnimationScript *animationScript = new AnimationScript();
+    animationScript->setWidth(root.get<unsigned int>("width", 0));
+    animationScript->setHeight(root.get<unsigned int>("height", 0));
+
+    for (pt::ptree::value_type &clipPair : root.get_child("clips")) {
+        string &filename = clipPair.second.data();
+        Mat m = imread(filename);
+        const string &name = clipPair.first.data();
+        Clip c = Clip(name, &m);
+        animationScript->addClip(c);
+    }
 
     for (pt::ptree::value_type &animation : root.get_child("animations")) {
-        cout << animation.second.get_child("clip").data() << endl;
+        string &clipName = animation.second.get_child("clip").data();
+        const Clip *clip = animationScript->getClip(clipName);
 
-        cout << animation.second.get_child("start").get_child("frame").data() << endl;
-        cout << animation.second.get_child("start").get_child("position").get_child("x").data() << endl;
-        cout << animation.second.get_child("start").get_child("position").get_child("y").data() << endl;
+        const pt::ptree &start = animation.second.get_child("start");
+        const KeyFrame &startFrame = parseKeyFrame(start);
 
-        cout << animation.second.get_child("stop").get_child("frame").data() << endl;
-        cout << animation.second.get_child("stop").get_child("position").get_child("x").data() << endl;
-        cout << animation.second.get_child("stop").get_child("position").get_child("y").data() << endl;
+        const auto &stop = animation.second.get_child("stop");
+        const KeyFrame &stopFrame = parseKeyFrame(stop);
 
-        cout << endl;
+        animationScript->addAnimation(Animation(clip, startFrame, stopFrame));
+    }
+
+    VideoWriter video(outputFilename, CV_FOURCC('M', 'J', 'P', 'G'), 10,
+            Size(animationScript->getWidth(), animationScript->getHeight()), true);
+    for (unsigned long i = 0; i < 128; ++i) {
+        const Mat &frame = animationScript->getFrame(i);
+        video.write(frame);
     }
 
     /*for (int i = 0; i < 100; ++i) {
