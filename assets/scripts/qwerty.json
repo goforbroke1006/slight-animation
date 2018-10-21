@@ -1,0 +1,16 @@
+,
+{
+"clip": "step-2",
+"start": {"frame": 20, "position": {"x": 100, "y": -50}},
+"stop": {"frame": 40, "position": {"x": 100, "y": 65}}
+},
+{
+"clip": "step-3",
+"start": {"frame": 40, "position": {"x": 140, "y": -50}},
+"stop": {"frame": 60, "position": {"x": 150, "y": 40}}
+},
+{
+"clip": "step-4",
+"start": {"frame": 60, "position": {"x": 260, "y": -50}},
+"stop": {"frame": 80, "position": {"x": 260, "y": 10}}
+}

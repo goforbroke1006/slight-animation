@@ -118,7 +118,31 @@ namespace SlightAnimation {
             }
         }
 
-        const Point &getPositionFor(unsigned long index) const {
+        const Clip *getClip() const {
+            return clip;
+        }
+
+        void setClip(const Clip *clip) {
+            Animation::clip = clip;
+        }
+
+        const KeyFrame &getStart() const {
+            return start;
+        }
+
+        void setStart(const KeyFrame &start) {
+            Animation::start = start;
+        }
+
+        const KeyFrame &getStop() const {
+            return stop;
+        }
+
+        void setStop(const KeyFrame &stop) {
+            Animation::stop = stop;
+        }
+
+        const Point getPositionFor(unsigned long index) const {
             if (index < start.getIndex() || stop.getIndex() < index) {
                 throw WrongFrameIndex();
             }
@@ -135,8 +159,7 @@ namespace SlightAnimation {
             int aproxY = start.getPosition().getY()
                          + partY * localIndex;
 
-            const Point &point = Point(aproxX, aproxY);
-            return point;
+            return Point(aproxX, aproxY);
         }
     };
 
@@ -205,24 +228,35 @@ namespace SlightAnimation {
             animations.push_back(animation);
         }
 
-        const Mat &getFrame(unsigned long frameIndex) {
-            cv::Rect roi = cv::Rect(0, 0, this->getWidth(), this->getHeight());
+        const Mat getFrame(unsigned long frameIndex) {
+//            cv::Rect roi = cv::Rect(0, 0, this->getWidth(), this->getHeight());
+//
+//            Mat bgMat = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
+//            cv::Mat out_image = bgMat.clone();
+//
+//            cv::Mat A_roi = bgMat(roi);
+//            cv::Mat out_image_roi = out_image(roi);
 
-            const Mat bgMat = *(this->getClip("background")->getMaterial());
-            cv::Mat out_image = bgMat.clone();
-
-            cv::Mat A_roi = bgMat(roi);
-            cv::Mat out_image_roi = out_image(roi);
-
-            double alpha = 0.1;
+            cv::Mat out_image_roi;
 
             for (const auto &anim : this->getAnimations()) {
                 try {
-                    const Point &point = anim.getPositionFor(frameIndex);
-                    cv::Mat out = cv::Mat::zeros(bgMat.size(), bgMat.type());
-                    bgMat(cv::Rect(0, 10, bgMat.cols, bgMat.rows - 10))
-                            .copyTo(out(cv::Rect(0, 0, bgMat.cols, bgMat.rows - 10)));
-                    cv::addWeighted(A_roi, alpha, out, 1 - alpha, 0.0, out_image_roi);
+//                    const Point &point = anim.getPositionFor(frameIndex);
+//                    const Size &size = bgMat.size();
+//                    int type = bgMat.type();
+//                    cv::Mat out = cv::Mat::zeros(size, type);
+//
+//                    const int &x = point.getX();
+//                    const int &y = point.getY();
+//                    int w = bgMat.cols - point.getX();
+//                    int h = bgMat.rows - point.getY();
+//
+//                    bgMat(cv::Rect(x, y, w, h))
+//                            .copyTo(out(cv::Rect(x, y, w, h)));
+//                    cv::addWeighted(A_roi, 1.0, out, 1.0, 0.0, out_image_roi);
+
+                    out_image_roi = *(anim.getClip()->getMaterial());
+
                 } catch (Animation::WrongFrameIndex ex) {
                     //
                 }
