@@ -15,6 +15,80 @@ using namespace cv;
 
 namespace SlightAnimation {
 
+    int clamp(int val, int min, int max) {
+        if (val < min) return min;
+        if (val > max) return max;
+        return val;
+    }
+
+    class Point {
+    private:
+        int x, y;
+    public:
+        Point(int x, int y)
+                : x(x),
+                  y(y) {}
+
+        const int &getX() const {
+            return x;
+        }
+
+        void setX(int x) {
+            Point::x = x;
+        }
+
+        const int &getY() const {
+            return y;
+        }
+
+        void setY(int y) {
+            Point::y = y;
+        }
+    };
+
+    class HasNoVisiblePartException : public exception {
+    public:
+        const char *what() const throw() {
+            return "Mat has no visible part!";
+        }
+    };
+
+    Rect getVisiblePartRect(Mat material, Size canvasSize, SlightAnimation::Point startPosition) {
+        int x = 0;
+        if (startPosition.getX() < 0)
+            x -= startPosition.getX();
+
+        int y = 0;
+        if (startPosition.getY() < 0)
+            y -= startPosition.getY();
+
+        int w = material.cols;
+        if (startPosition.getX() < 0)
+            w -= abs(startPosition.getX());
+        if (startPosition.getX() + w > canvasSize.width)
+            w -= (startPosition.getX() + w - canvasSize.width);
+
+        int h = material.rows;
+        if (startPosition.getY() < 0)
+            h -= abs(startPosition.getY());
+        if (startPosition.getY() + h > canvasSize.height)
+            h -= (startPosition.getY() + h - canvasSize.height);
+
+        if (
+                x >= material.cols
+                || y >= material.rows
+                || w <= 0
+                || h <= 0
+                )
+            throw HasNoVisiblePartException();
+
+        return Rect(x, y, w, h);
+    }
+
+    Rect getCanvasEmbeddingArea(Mat material, Size canvasSize, SlightAnimation::Point startPosition) {
+        return Rect(); // TODO: implement me!!!
+    }
+
     class Clip {
     private:
         string name;
@@ -42,30 +116,6 @@ namespace SlightAnimation {
         }
     };
 
-    class Point {
-    private:
-        int x, y;
-    public:
-        Point(int x, int y)
-                : x(x),
-                  y(y) {}
-
-        const int &getX() const {
-            return x;
-        }
-
-        void setX(int x) {
-            Point::x = x;
-        }
-
-        const int &getY() const {
-            return y;
-        }
-
-        void setY(int y) {
-            Point::y = y;
-        }
-    };
 
     class KeyFrame {
     private:
@@ -168,8 +218,8 @@ namespace SlightAnimation {
         string outputFilename;
         unsigned int width;
         unsigned int height;
-        list<Clip> clips;
-        list<Animation> animations;
+        list <Clip> clips;
+        list <Animation> animations;
     public:
         const string &getOutputFilename() const {
             return outputFilename;
@@ -195,7 +245,7 @@ namespace SlightAnimation {
             AnimationScript::height = height;
         }
 
-        const list<Clip> &getClips() const {
+        const list <Clip> &getClips() const {
             return clips;
         }
 
@@ -203,7 +253,7 @@ namespace SlightAnimation {
             clips.push_back(clip);
         }
 
-        void setClips(const list<Clip> &clips) {
+        void setClips(const list <Clip> &clips) {
             AnimationScript::clips = clips;
         }
 
@@ -216,11 +266,11 @@ namespace SlightAnimation {
             return nullptr;
         }
 
-        const list<Animation> &getAnimations() const {
+        const list <Animation> &getAnimations() const {
             return animations;
         }
 
-        void setAnimations(const list<Animation> &animations) {
+        void setAnimations(const list <Animation> &animations) {
             AnimationScript::animations = animations;
         }
 
@@ -237,32 +287,37 @@ namespace SlightAnimation {
 //            cv::Mat A_roi = bgMat(roi);
 //            cv::Mat out_image_roi = out_image(roi);
 
-            cv::Mat out_image_roi;
+            //cv::Mat out_image_roi;
+
+            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
 
             for (const auto &anim : this->getAnimations()) {
                 try {
-//                    const Point &point = anim.getPositionFor(frameIndex);
+                    const Point &point = anim.getPositionFor(frameIndex);
+                    Mat graphics = *(anim.getClip()->getMaterial());
+                    Rect layoutVisiblePart = getVisiblePartRect(graphics, canvas.size(), point);
+
 //                    const Size &size = bgMat.size();
 //                    int type = bgMat.type();
 //                    cv::Mat out = cv::Mat::zeros(size, type);
 //
-//                    const int &x = point.getX();
-//                    const int &y = point.getY();
-//                    int w = bgMat.cols - point.getX();
+//                    const int &x = point.getX() < 0 ? 0 : point.getX();
+//                    const int &y = point.getY() < 0 ? 0 : point.getY();
+//                    int w = (graphics.cols > this->getWidth()) ? graphics.cols - point.getX() : graphics.cols;
 //                    int h = bgMat.rows - point.getY();
-//
-//                    bgMat(cv::Rect(x, y, w, h))
-//                            .copyTo(out(cv::Rect(x, y, w, h)));
+
+                    graphics(layoutVisiblePart)
+                            .copyTo(canvas(cv::Rect(x, y, w, h)));
 //                    cv::addWeighted(A_roi, 1.0, out, 1.0, 0.0, out_image_roi);
 
-                    out_image_roi = *(anim.getClip()->getMaterial());
+
 
                 } catch (Animation::WrongFrameIndex ex) {
                     //
                 }
             }
 
-            return out_image_roi;
+            return canvas;
         }
     };
 }
