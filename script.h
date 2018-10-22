@@ -295,18 +295,7 @@ namespace SlightAnimation {
         }
 
         const Mat getFrame(unsigned long frameIndex) {
-//            cv::Rect roi = cv::Rect(0, 0, this->getWidth(), this->getHeight());
-//
-//            Mat bgMat = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
-//            cv::Mat out_image = bgMat.clone();
-//
-//            cv::Mat A_roi = bgMat(roi);
-//            cv::Mat out_image_roi = out_image(roi);
-
-            //cv::Mat out_image_roi;
-
             Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8UC3);
-
             for (const auto &anim : this->getAnimations()) {
                 try {
                     const Point &point = anim.getPositionFor(frameIndex);
@@ -320,7 +309,6 @@ namespace SlightAnimation {
                     cerr << ex.what() << endl;
                 }
             }
-
             return canvas;
         }
     };

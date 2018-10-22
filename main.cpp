@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
     for (pt::ptree::value_type &clipPair : root.get_child("clips")) {
         string &filename = clipPair.second.data();
-        Mat m = imread(filename, IMREAD_COLOR);
+        Mat m = imread(filename, IMREAD_UNCHANGED);
 
         if (m.cols == 0 && m.rows == 0) {
             cerr << "Can't find image file: " << filename << endl;
