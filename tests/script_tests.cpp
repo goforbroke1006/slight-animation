@@ -62,10 +62,10 @@ TEST(AnimationTest, Idle2) {
 }
 
 TEST(GetVisibleAreaForGraphics, PositiveTest) {
-    Mat material = Mat::zeros(Size(400, 300), CV_8U);
+    Size matSize = Size(400, 300);
     Size canvasSize = Size(400, 300);
     SlightAnimation::Point point = SlightAnimation::Point(100, 100);
-    const Rect &actual = SlightAnimation::getVisiblePartRect(material, canvasSize, point);
+    const Rect &actual = SlightAnimation::getVisiblePartRect(matSize, canvasSize, point);
 
     const int x = actual.x;
     const int w = actual.width;
@@ -75,10 +75,10 @@ TEST(GetVisibleAreaForGraphics, PositiveTest) {
 }
 
 TEST(GetVisibleAreaForGraphics, PositiveTest2) {
-    Mat material = Mat::zeros(Size(400, 300), CV_8U);
+    Size matSize = Size(400, 300);
     Size canvasSize = Size(400, 300);
     SlightAnimation::Point point = SlightAnimation::Point(-100, -150);
-    const Rect &actual = SlightAnimation::getVisiblePartRect(material, canvasSize, point);
+    const Rect &actual = SlightAnimation::getVisiblePartRect(matSize, canvasSize, point);
 
     const int x = actual.x;
     const int w = actual.width;
@@ -90,12 +90,12 @@ TEST(GetVisibleAreaForGraphics, PositiveTest2) {
 }
 
 TEST(GetVisibleAreaForGraphics, PositiveTest3) {
-    Mat material = Mat::zeros(Size(400, 300), CV_8U);
+    Size matSize = Size(400, 300);
     Size canvasSize = Size(400, 300);
     SlightAnimation::Point point = SlightAnimation::Point(-400, -400);
 
     try {
-        const Rect &actual = SlightAnimation::getVisiblePartRect(material, canvasSize, point);
+        const Rect &actual = SlightAnimation::getVisiblePartRect(matSize, canvasSize, point);
         FAIL() << "Expected SlightAnimation::out_of_range";
     } catch (SlightAnimation::HasNoVisiblePartException &ex) {
         ASSERT_GT(strlen(ex.what()), 0);
@@ -104,10 +104,10 @@ TEST(GetVisibleAreaForGraphics, PositiveTest3) {
 
 
 TEST(getCanvasEmbeddingArea_check, PositiveTest1) {
-    Mat material = Mat::zeros(Size(100, 60), CV_8U);
+    Size matSize = Size(100, 60);
     Size canvasSize = Size(400, 300);
     SlightAnimation::Point point = SlightAnimation::Point(150, 100);
-    const Rect &actual = SlightAnimation::getCanvasEmbeddingArea(material, canvasSize, point);
+    const Rect &actual = SlightAnimation::getCanvasEmbeddingArea(matSize, canvasSize, point);
 
     const int x = actual.x;
     const int w = actual.width;
@@ -121,10 +121,10 @@ TEST(getCanvasEmbeddingArea_check, PositiveTest1) {
 }
 
 TEST(getCanvasEmbeddingArea_check, PositiveTest2_invisiblePart) {
-    Mat material = Mat::zeros(Size(100, 60), CV_8U);
+    Size matSize = Size(100, 60);
     Size canvasSize = Size(400, 300);
     SlightAnimation::Point point = SlightAnimation::Point(-50, 100);
-    const Rect &actual = SlightAnimation::getCanvasEmbeddingArea(material, canvasSize, point);
+    const Rect &actual = SlightAnimation::getCanvasEmbeddingArea(matSize, canvasSize, point);
 
     const int x = actual.x;
     const int w = actual.width;

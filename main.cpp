@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
     for (pt::ptree::value_type &clipPair : root.get_child("clips")) {
         string &filename = clipPair.second.data();
-        Mat m = imread(filename);
+        Mat m = imread(filename, IMREAD_COLOR);
 
         if (m.cols == 0 && m.rows == 0) {
             cerr << "Can't find image file: " << filename << endl;
@@ -49,6 +49,8 @@ int main(int argc, char **argv) {
         m.copyTo(*material);
         Clip c = Clip(name, material);
         animationScript->addClip(c);
+
+        cout << "Load material: " << filename << "; type: " << material->type() << endl;
     }
 
     for (pt::ptree::value_type &animation : root.get_child("animations")) {
@@ -68,7 +70,7 @@ int main(int argc, char **argv) {
     unsigned int height = animationScript->getHeight();
     VideoWriter video(
             animationScript->getOutputFilename(),
-            CV_FOURCC('M', 'J', 'P', 'G'),
+            VideoWriter::fourcc('M', 'J', 'P', 'G'),
             12,
             Size(width, height),
             true

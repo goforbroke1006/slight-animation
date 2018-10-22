@@ -53,7 +53,7 @@ namespace SlightAnimation {
         }
     };
 
-    Rect getVisiblePartRect(Mat material, Size canvasSize, SlightAnimation::Point startPosition) {
+    Rect getVisiblePartRect(Size matSize, Size canvasSize, SlightAnimation::Point startPosition) {
         int x = 0;
         if (startPosition.getX() < 0)
             x -= startPosition.getX();
@@ -62,21 +62,21 @@ namespace SlightAnimation {
         if (startPosition.getY() < 0)
             y -= startPosition.getY();
 
-        int w = material.cols;
+        int w = matSize.width;
         if (startPosition.getX() < 0)
             w -= abs(startPosition.getX());
         if (startPosition.getX() + w > canvasSize.width)
             w -= (startPosition.getX() + w - canvasSize.width);
 
-        int h = material.rows;
+        int h = matSize.height;
         if (startPosition.getY() < 0)
             h -= abs(startPosition.getY());
         if (startPosition.getY() + h > canvasSize.height)
             h -= (startPosition.getY() + h - canvasSize.height);
 
         if (
-                x >= material.cols
-                || y >= material.rows
+                x >= matSize.width
+                || y >= matSize.height
                 || w <= 0
                 || h <= 0
                 )
@@ -85,8 +85,24 @@ namespace SlightAnimation {
         return Rect(x, y, w, h);
     }
 
-    Rect getCanvasEmbeddingArea(Mat material, Size canvasSize, SlightAnimation::Point startPosition) {
-        return Rect(); // TODO: implement me!!!
+    Rect getCanvasEmbeddingArea(Size matSize, Size canvasSize, SlightAnimation::Point startPosition) {
+        int x = startPosition.getX();
+        int y = startPosition.getY();
+        int w = matSize.width;
+        int h = matSize.height;
+
+        if (startPosition.getX() < 0) {
+            x = 0;
+            w -= abs(startPosition.getX());
+        }
+        if (startPosition.getY() < 0) {
+            y = 0;
+            h -= abs(startPosition.getY());
+        }
+        if (w > canvasSize.width) w = canvasSize.width;
+        if (h > canvasSize.height) h = canvasSize.height;
+
+        return Rect(x, y, w, h);
     }
 
     class Clip {
@@ -218,8 +234,8 @@ namespace SlightAnimation {
         string outputFilename;
         unsigned int width;
         unsigned int height;
-        list <Clip> clips;
-        list <Animation> animations;
+        list<Clip> clips;
+        list<Animation> animations;
     public:
         const string &getOutputFilename() const {
             return outputFilename;
@@ -245,7 +261,7 @@ namespace SlightAnimation {
             AnimationScript::height = height;
         }
 
-        const list <Clip> &getClips() const {
+        const list<Clip> &getClips() const {
             return clips;
         }
 
@@ -253,7 +269,7 @@ namespace SlightAnimation {
             clips.push_back(clip);
         }
 
-        void setClips(const list <Clip> &clips) {
+        void setClips(const list<Clip> &clips) {
             AnimationScript::clips = clips;
         }
 
@@ -266,11 +282,11 @@ namespace SlightAnimation {
             return nullptr;
         }
 
-        const list <Animation> &getAnimations() const {
+        const list<Animation> &getAnimations() const {
             return animations;
         }
 
-        void setAnimations(const list <Animation> &animations) {
+        void setAnimations(const list<Animation> &animations) {
             AnimationScript::animations = animations;
         }
 
@@ -289,31 +305,19 @@ namespace SlightAnimation {
 
             //cv::Mat out_image_roi;
 
-            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
+            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8UC3);
 
             for (const auto &anim : this->getAnimations()) {
                 try {
                     const Point &point = anim.getPositionFor(frameIndex);
                     Mat graphics = *(anim.getClip()->getMaterial());
-                    Rect layoutVisiblePart = getVisiblePartRect(graphics, canvas.size(), point);
-
-//                    const Size &size = bgMat.size();
-//                    int type = bgMat.type();
-//                    cv::Mat out = cv::Mat::zeros(size, type);
-//
-//                    const int &x = point.getX() < 0 ? 0 : point.getX();
-//                    const int &y = point.getY() < 0 ? 0 : point.getY();
-//                    int w = (graphics.cols > this->getWidth()) ? graphics.cols - point.getX() : graphics.cols;
-//                    int h = bgMat.rows - point.getY();
-
-                    graphics(layoutVisiblePart)
-                            .copyTo(canvas(cv::Rect(x, y, w, h)));
-//                    cv::addWeighted(A_roi, 1.0, out, 1.0, 0.0, out_image_roi);
-
-
-
+                    Rect layoutVisiblePart = getVisiblePartRect(graphics.size(), canvas.size(), point);
+                    Rect cea = getCanvasEmbeddingArea(graphics.size(), canvas.size(), point);
+                    graphics(layoutVisiblePart).copyTo(canvas(cea));
                 } catch (Animation::WrongFrameIndex ex) {
                     //
+                } catch (SlightAnimation::HasNoVisiblePartException &ex) {
+                    cerr << ex.what() << endl;
                 }
             }
 
