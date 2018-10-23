@@ -295,18 +295,25 @@ namespace SlightAnimation {
         }
 
         const Mat getFrame(unsigned long frameIndex) {
-            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8UC3);
+            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
+//            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8UC4);
+//            Mat canvas;
+//            (this->getClip("background")->getMaterial())->copyTo(canvas);
+//            Mat canvas = Mat(this->getHeight(), this->getWidth(), CV_8UC4, cv::Scalar(255, 255, 255, 0));
             for (const auto &anim : this->getAnimations()) {
                 try {
                     const Point &point = anim.getPositionFor(frameIndex);
                     Mat graphics = *(anim.getClip()->getMaterial());
                     Rect layoutVisiblePart = getVisiblePartRect(graphics.size(), canvas.size(), point);
                     Rect cea = getCanvasEmbeddingArea(graphics.size(), canvas.size(), point);
+                    cout << graphics.type() << " > > " << canvas.type() << endl;
                     graphics(layoutVisiblePart).copyTo(canvas(cea));
                 } catch (Animation::WrongFrameIndex ex) {
                     //
                 } catch (SlightAnimation::HasNoVisiblePartException &ex) {
                     cerr << ex.what() << endl;
+                } catch (cv::Exception &ex) {
+                    cerr << ex.line << ":" << ex.line << " - " << ex.what() << endl;
                 }
             }
             return canvas;
