@@ -31,9 +31,9 @@ int main(int argc, char **argv) {
     pt::read_json(scriptFilename, root);
 
     auto *animationScript = new AnimationScript();
-    animationScript->setOutputFilename(root.get<char *>("output-file", 0));
-    animationScript->setWidth(root.get<unsigned int>("width", 0));
-    animationScript->setHeight(root.get<unsigned int>("height", 0));
+    animationScript->setOutputFilename(root.get_child("output-file").data());
+    animationScript->setWidth(atoi(root.get_child("width", 0).data()));
+    animationScript->setHeight(atoi(root.get_child("height", 0).data()));
 
     for (pt::ptree::value_type &clipPair : root.get_child("clips")) {
         string &filename = clipPair.second.data();

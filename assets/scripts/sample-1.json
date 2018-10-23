@@ -1,7 +1,7 @@
 {
   "output-file": "sample-1.avi",
-  "width": 800,
-  "height" : 600,
+  "width": "800",
+  "height" : "600",
   "clips": {
       "background": "/home/goforbroke/CLionProjects/slight-animation/assets/sample-1.jpg",
       "step-1": "/home/goforbroke/CLionProjects/slight-animation/assets/1.png",
