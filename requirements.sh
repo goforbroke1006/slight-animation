@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
 
-#sudo apt-get install -y libopencv-dev
+
+# ==================================================
+# ========== OpenCV
+# ==================================================
 
 sudo apt-get install -y git
 sudo apt-get install -y build-essential
@@ -24,10 +27,15 @@ sudo make install
 pkg-config --modversion opencv
 
 
+
+# ==================================================
+# ========== GTest
+# ==================================================
+
 sudo apt-get install -y libgtest-dev
 sudo apt-get install cmake
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
 sudo make
-# copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
-sudo cp *.a /usr/lib
+
+sudo cp *.a /usr/lib # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
