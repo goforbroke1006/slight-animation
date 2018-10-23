@@ -32,12 +32,12 @@ int main(int argc, char **argv) {
 
     auto *animationScript = new AnimationScript();
     animationScript->setOutputFilename(root.get_child("output-file").data());
-    animationScript->setWidth(atoi(root.get_child("width", 0).data()));
-    animationScript->setHeight(atoi(root.get_child("height", 0).data()));
+    animationScript->setWidth(atoi(root.get_child("width").data().c_str()));
+    animationScript->setHeight(atoi(root.get_child("height").data().c_str()));
 
     for (pt::ptree::value_type &clipPair : root.get_child("clips")) {
         string &filename = clipPair.second.data();
-        Mat m = imread(filename, ImreadModes::IMREAD_ANYDEPTH);
+        Mat m = imread(filename, ImreadModes::IMREAD_UNCHANGED);
 
         if (m.cols == 0 && m.rows == 0) {
             cerr << "Can't find image file: " << filename << endl;

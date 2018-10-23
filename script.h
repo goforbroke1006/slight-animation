@@ -295,8 +295,8 @@ namespace SlightAnimation {
         }
 
         const Mat getFrame(unsigned long frameIndex) {
-            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
-//            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8UC4);
+//            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8U);
+            Mat canvas = Mat::zeros(Size(this->getWidth(), this->getHeight()), CV_8UC4);
 //            Mat canvas;
 //            (this->getClip("background")->getMaterial())->copyTo(canvas);
 //            Mat canvas = Mat(this->getHeight(), this->getWidth(), CV_8UC4, cv::Scalar(255, 255, 255, 0));
